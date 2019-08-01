@@ -1,0 +1,190 @@
+﻿
+@using  SocialNetwork.ViewModels;
+@using  SocialNetwork.Models;
+@model List<MessageViewModel>;
+<div class="row">
+    <div class="col-lg-3">
+        <div class="container">
+            @foreach (var frn in ViewBag.frn_list)
+            {
+                <div class="card mt-1">
+                    <a asp-controller="Message" asp-action="Index" asp-route-id="@frn.User_Id"> <div><img src="@frn.profile_Picture_Url" height="33" width="33" class="rounded-circle" /><span>@frn.First_Name @frn.Last_Name</span></div></a>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-lg-6  ">
+        <div class="receiver" id="@ViewBag.receiver_id" hidden></div>
+        @if (ViewBag.receiver != null)
+        {
+            <div class="card alert-primary">
+                <span>
+                    <img src="@ViewBag.receiver.profile_Picture_Url" class="rounded-circle" height="35" width="35" />
+                    @ViewBag.receiver.First_Name @ViewBag.receiver.Last_Name
+                </span>
+            </div>
+
+            <div id='messagebox' val="@ViewBag.receiver_id">
+                <div class='card message_update' id="scrollanimate" style='height:66vh;overflow-y:scroll;overflow-x:hidden'>
+                    @foreach (var msg in Model)
+                    {
+
+
+
+                        @if (ViewBag.userid == msg.Message.Receiver)
+                        {
+
+
+                            <div class="mr-auto "> <img class='rounded-circle ' height=30 width=30 src=@msg.SenderProfile.profile_Picture_Url><span class='btn btn-sm btn-primary  '>@msg.Message.Body</span></div>
+
+                        }
+                        else
+                        {
+                            <div class="ml-auto mr-1"> <span class='btn btn-sm btn-info mr-1 mt-1' style="height:auto">@msg.Message.Body</span><img class='rounded-circle ' height=30 width=30 src=@msg.SenderProfile.profile_Picture_Url></div>
+
+                        }
+
+                        <br>
+                    }
+
+
+                </div>
+
+
+
+                <form class='form' method='POST' asp-controller="Message" asp-action="Index" id='message_form'>
+                    <textarea id='textarea' name='message' class='mt-auto form-control' cols=36 rows=1 style="border-radius:20px"></textarea>
+                    <button type='submit' class='btn btn-success btn-sm'>Send</button>
+
+                </form>
+
+            </div>
+
+        }
+
+        else
+        {
+            <h5>Home page is yet to make!!! Click on any Friends Box to start a chat!!!</h5>
+        }
+    </div>
+        
+
+        <div class="col-lg-3">
+            <div class="card text-center h5"> Friend Requests </div>
+            @foreach (Profile fr in ViewBag.frnreq_list)
+            {
+                <div class="card text-center">
+
+                    <div class="text-center mt-1"><img src="@fr.profile_Picture_Url" height="100" width="100 " /></div>
+                    <div class="card-text">@fr.First_Name @fr.Last_Name</div>
+                    <div class="btn-group">
+                        <form asp-controller="Profile" asp-action="Accept_Request" asp-route-id="@fr.User_Id" method="post" asp-route-data="/">
+                            <button class="btn btn-info btn-sm mr-5 ml-5" type="submit">Accept</button>
+                        </form>
+                        <form asp-controller="Profile" asp-action="Deny_Request" asp-route-id="@fr.User_Id" method="post" asp-route-data="/">
+                            <button class="btn btn-warning btn-sm" type="submit">Deny</button>
+
+                        </form>
+                    </div>
+                </div>
+            }
+            
+
+        </div>
+    </div>
+
+@section  Scripts{ 
+<script>
+    $(document).ready(function () {
+    $("#scrollanimate").stop().animate({ scrollTop: $("#scrollanimate")[0].scrollHeight})
+        var id = $(".receiver").attr("id");
+       
+   
+        function send(){
+          var msg=$("#textarea").val();
+          if(msg.length==0 | msg=="\n"){
+              return false;
+          }
+          else{
+          document.getElementById('textarea').value='';
+          $.ajax({
+            type:'POST',
+            url:"/messageapi/sendmessage/"+id+'/',
+            data:{
+              csrfmiddlewaretoken:$("input[name=csrfmiddlewaretoken]").val(),
+                message: msg,
+               
+                
+            },
+              success: function (data) {
+                  console.log(data);
+                  var div = document.createElement("div");
+                  div.className="text-right"
+                  
+                    var img=document.createElement("img");
+                    var div2=document.createElement("span");
+                    img.height=30;
+                  img.width = 30;
+                  
+                    $("#audio").trigger('play');
+                    img.className='rounded-circle';
+                    img.src=data.sender_Profile_Picture;
+                    div2.className="btn btn-sm btn-info ml-auto mt-1";
+                  div2.innerHTML = data.message;
+                  div.appendChild(div2)
+                    div.appendChild(img);
+
+                    $("#scrollanimate").stop().animate({ scrollTop: $("#scrollanimate")[0].scrollHeight});
+                    $(".message_update").append(div);
+            }
+          })
+              
+        }
+        }
+        $("#message_form").submit(function(e){
+            e.preventDefault();
+          send();
+        })
+        $("#textarea").keyup(function(e){
+          var message=$("#textarea").val();
+          for(i=0;i<message.length;i++){
+            if(message[i]=='\n'){
+              send();
+            }
+          }
+
+        })
+
+       
+        setInterval(function () {
+            var id = $(".receiver").attr("id");
+            $.ajax({
+                type:'GET',
+                url: '/messageapi/getmessages/' + id + '/',
+                data:id,
+                success: function (data) {
+                    console.log(data);
+                    var div = document.createElement("div");
+                  div.className="text-left"
+                    var img=document.createElement("img");
+                    var div2=document.createElement("span");
+                    img.height=30;
+                  img.width = 30;
+                  
+                    $("#audio").trigger('play');
+                    img.className='rounded-circle';
+                    img.src=data.sender_Profile_Picture;
+                    div2.className="btn btn-sm btn-primary ml-auto mt-1";
+                  div2.innerHTML = data.message;
+                  
+                    div.appendChild(img);
+                    div.appendChild(div2);
+                    $("#scrollanimate").stop().animate({ scrollTop: $("#scrollanimate")[0].scrollHeight});
+                    $(".message_update").append(div);
+                }
+            })
+ }, 1000)
+        })
+</script>
+}
+

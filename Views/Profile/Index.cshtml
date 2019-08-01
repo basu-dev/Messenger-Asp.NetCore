@@ -1,0 +1,31 @@
+﻿@using SocialNetwork.ViewModels;
+@model ProfileView;
+<div class="row">
+    <div class="col-lg-1"></div>
+    <div class="col-lg-10">
+        <form asp-controller="Profile" asp-action="Index" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label asp-for="First_Name"></label>
+                <input asp-for="First_Name" />
+                <span asp-validation-for="First_Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Last_Name"></label>
+                <input asp-for="Last_Name" />
+                <span asp-validation-for="Last_Name" class="text-danger"></span>
+            </div>
+            <div class="form-group custom-file">
+                <label asp-for="Photo"></label>
+                <input asp-for="Photo" class="custom-file-label" />
+                <span asp-validation-for="Photo" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-success">Update</button>
+        </form>
+
+    </div>
+    <div class="col-lg-1">
+        
+    </div>
+
+</div>
+

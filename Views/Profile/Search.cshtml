@@ -1,0 +1,69 @@
+﻿@using SocialNetwork.ViewModels;
+
+
+@model List<SearchViewModel>;
+<div class="row">
+    <div class="col-lg-2"></div>
+    <div class="col-lg-8">
+        @foreach (SearchViewModel p in Model)
+        {
+            <div class="card text-center mt-2">
+                <div class="text-center"> <img src="@p.Photo" height="100" width="100" class="text-center" /></div>
+                <div class="card-text text-center">@p.First_Name @p.Last_Name</div>
+                @if (p.User_Id != ViewBag.userid)
+                {
+                @if (p.already_friend)
+                {
+  <form method="post" asp-controller="Profile" asp-action="Unfriend" asp-route-id="@p.User_Id" asp-route-data="/profile/search?username=@p.search_data"  >  
+                   <button class="btn btn-sm btn-success text-center" type="submit">Unfriend</button>
+                    </form>
+                }
+                else
+                {
+                    @if (p.rqst_sent)
+                    {
+                        <form method="post" asp-controller="Profile" asp-action="Cancel_Request" asp-route-id="@p.User_Id" asp-route-data="/profile/search?username=@p.search_data">
+                            <button class="btn btn-sm btn-success text-center" type="submit">Cancel Request</button>
+                        </form>
+                    }
+                    else
+                    {
+                        @if (p.rqst_received)
+                        {
+                            <div class="text-center">
+                            <div class="btn-group">
+                            <form method="post"  asp-controller="Profile" asp-action="Accept_Request" asp-route-id="@p.User_Id" asp-route-data="/profile/search?username=@p.search_data">
+                                <button class="btn btn-sm btn-success text-center" type="submit">Accept</button>
+                            </form>
+                            <form method="POST"  asp-controller="Profile" asp-action="Deny_Request" asp-route-id="@p.User_Id" asp-route-data="/profile/search?username=@p.search_data">
+                                <button class="btn btn-sm btn-success text-center ml-1" type="submit">Deny</button>
+                            </form>
+                                </div>
+                                </div>
+                        }
+                        else
+                        {
+                            <form method="post" asp-controller="Profile" asp-action="Add_Friend" asp-route-id="@p.User_Id" asp-route-data="/profile/search?username=@p.search_data">
+                                <button class="btn btn-sm btn-success text-center" type="submit">Connect</button>
+                            </form>
+                        }
+                    }
+                }
+
+                }
+                
+
+                
+    </div>
+        }
+
+    </div>
+    <div class="col-lg-2"></div>
+    </div>
+
+
+
+
+
+
+
